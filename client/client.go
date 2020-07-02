@@ -130,6 +130,10 @@ func NewClient(config *Config) (*Client, error) {
 	return client, nil
 }
 
+func (c *Client) CreateTCPProxy(index int, remote *chshare.Remote) *chshare.TCPProxy {
+	return chshare.NewTCPProxy(c.Logger, func() ssh.Conn { return c.sshConn }, index, remote)
+}
+
 //Run starts client and blocks while connected
 func (c *Client) Run() error {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -160,7 +164,7 @@ func (c *Client) Start(ctx context.Context) error {
 	//prepare non-reverse proxies
 	for i, r := range c.config.shared.Remotes {
 		if !r.Reverse {
-			proxy := chshare.NewTCPProxy(c.Logger, func() ssh.Conn { return c.sshConn }, i, r)
+			proxy := c.CreateTCPProxy(i, r)
 			if err := proxy.Start(ctx); err != nil {
 				return err
 			}
