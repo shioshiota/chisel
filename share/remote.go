@@ -2,6 +2,7 @@ package chshare
 
 import (
 	"errors"
+	"io"
 	"net/url"
 	"regexp"
 	"strings"
@@ -30,6 +31,7 @@ import (
 type Remote struct {
 	LocalHost, LocalPort, RemoteHost, RemotePort string
 	Socks, Reverse, Stdio                        bool
+	LocalIO                                      io.ReadWriteCloser
 }
 
 const revPrefix = "R:"

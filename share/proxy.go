@@ -33,9 +33,14 @@ func NewTCPProxy(logger *Logger, ssh GetSSHConn, index int, remote *Remote) *TCP
 
 func (p *TCPProxy) Start(ctx context.Context) error {
 	if p.remote.Stdio {
-		go p.listenStdio(ctx)
+		go p.listenIO(ctx, Stdio)
 		return nil
 	}
+	if p.remote.LocalIO != nil {
+		go p.listenIO(ctx, p.remote.LocalIO)
+		return nil
+	}
+
 	l, err := net.Listen("tcp4", p.remote.LocalHost+":"+p.remote.LocalPort)
 	if err != nil {
 		return fmt.Errorf("%s: %s", p.Logger.Prefix(), err)
@@ -44,9 +49,9 @@ func (p *TCPProxy) Start(ctx context.Context) error {
 	return nil
 }
 
-func (p *TCPProxy) listenStdio(ctx context.Context) {
+func (p *TCPProxy) listenIO(ctx context.Context, src io.ReadWriteCloser) {
 	for {
-		p.accept(Stdio)
+		p.accept(src)
 		select {
 		case <-ctx.Done():
 			return
