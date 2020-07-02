@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"time"
 
 	"github.com/jpillora/sizestr"
 	"golang.org/x/crypto/ssh"
@@ -51,6 +52,7 @@ func (p *TCPProxy) listenStdio(ctx context.Context) {
 			return
 		default:
 			// the connection is not ready yet, keep waiting
+			time.Sleep(time.Second) // to avoid busy loop
 		}
 	}
 }
